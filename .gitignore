@@ -1,0 +1,8 @@
+SupUnity/Library/
+SupUnity/Temp/
+SupUnity/Logs/
+SupUnity/UserSettings/
+SupUnity/Assembly-CSharp.csproj
+SupUnity/Assembly-CSharp-Editor.csproj
+SupUnity/SupUnity.sln
+SupUnity/.vsconfig
