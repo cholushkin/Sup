@@ -106,20 +106,19 @@ public class EntTamplier : MonoBehaviour
 
         foreach (var spore in Spores)
         {
-            ThrowPods(spore.transform.up.normalized, spore);
+            ThrowPods(spore.up.normalized, spore);
         }
 
         transform.DORotate(new Vector3(0, 0, transform.eulerAngles.z + 360), 1.0f, RotateMode.FastBeyond360).SetEase(Ease.Linear).SetLoops(-1);
-        transform.DOScale(Vector3.one * 0.01f, ThrowPodDuration * 0.5f).OnComplete(() => Destroy(gameObject));
+        transform.DOScale(Vector3.one * 0.01f, ThrowPodDuration * 0.25f).OnComplete(() => Destroy(gameObject));
     }
-
 
     private void ThrowPods(Vector3 normal, Transform obj)
     {
         obj.GetComponent<BoxCollider>().enabled = true;
-        obj.transform.parent = null;
+        obj.SetParent(null);
         obj.DOMove(
-            transform.position + normal * ThrowPodHeight,
+            obj.transform.position + normal * ThrowPodHeight,
             ThrowPodDuration)
             .OnComplete(() => Destroy(obj.gameObject));
     }

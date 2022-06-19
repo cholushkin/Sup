@@ -33,7 +33,7 @@ public class GameController : MonoBehaviour
     {
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            if(_isFail)
+            if (_isFail)
                 RestartProgression();
             else if (_isWin)
                 NextLevel();
@@ -59,7 +59,7 @@ public class GameController : MonoBehaviour
             return;
 
         var ents = MapController.GetEntities();
-        
+
         // check for win
         var isWin = ents.Length == 0;
         if (isWin)

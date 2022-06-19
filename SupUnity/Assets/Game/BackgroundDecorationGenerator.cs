@@ -8,7 +8,7 @@ public class BackgroundDecorationGenerator : MonoBehaviour
     {
         // create dots
         for (int i = 0; i < Progression.Instance.FieldWidth / 2; ++i)
-            CreateDot(new Vector3(Random.Range(bounds.left, bounds.right), Random.Range(bounds.top, bounds.bottom), 4), transform);
+            CreateDot(new Vector3(Random.Range(bounds.xMin, bounds.xMax), Random.Range(bounds.yMin, bounds.yMax), 4), transform);
     }
 
     private void CreateDot(Vector3 pos, Transform parent)
