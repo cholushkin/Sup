@@ -68,7 +68,9 @@ public class EntTamplier : MonoBehaviour
         IsInfected = true;
         if (donorID != -1)
         {
+            // first ever infected node
             Progression.Instance.Score++;
+            Spores[0].gameObject.SetActive(true);
             GlobalEventAggregator.EventAggregator.Publish(new EventScore());
         }
 
