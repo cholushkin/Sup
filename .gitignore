@@ -8,3 +8,6 @@ SupUnity/SupUnity.sln
 SupUnity/.vsconfig
 SupUnity/.vs/SupUnity/v16/.suo
 SupUnity/obj/
+Build/
+PackagesDistributives/
+SupUnity/Assembly-CSharp-firstpass.csproj
