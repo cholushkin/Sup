@@ -15,6 +15,7 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     public TextMeshProUGUI TextScore;
 
     public TextMeshProUGUI TextGameScore;
+    public TextMeshProUGUI TextBestScore;
 
     public Transform PressAnyKeyToRestart;
     public Transform PressAnyKeyToNextLevel;
@@ -31,7 +32,8 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
 
     public void Handle(EntTamplier.EventScore message)
     {
-        TextGameScore.text = Progression.Instance.Score.ToString();
+        TextGameScore.text = $"Score: {Progression.Instance.Score}";
+        TextBestScore.text = $"Your best score: {Progression.Instance.BestScore}";
     }
 
     public void Handle(GameController.EventWin message)
@@ -43,7 +45,6 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     public override void StartAppearAnimation()
     {
         base.StartAppearAnimation();
-        TextGameScore.text = Progression.Instance.Score.ToString();
         ShowStartMessage();
         if (Progression.Instance.Level == 0)
             ShowControlHintMessage();

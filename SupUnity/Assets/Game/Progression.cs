@@ -4,7 +4,8 @@ using UnityEngine;
 public class Progression : Singleton<Progression>
 {
     public int Level;
-    public int Score;
+    public int Score { get; private set; }
+    public int BestScore;
     public int FieldHeight = 50 / 3;
     public int FieldWidth = 90 / 3;
 
@@ -39,5 +40,12 @@ public class Progression : Singleton<Progression>
         Score = 0;
         FieldHeight = 50 / 3;
         FieldWidth = 90 / 3;
+    }
+
+    public void IncScore()
+    {
+        ++Score;
+        if (Score > BestScore)
+            BestScore = Score;
     }
 }

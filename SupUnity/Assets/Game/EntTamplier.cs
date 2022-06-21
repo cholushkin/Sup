@@ -8,8 +8,10 @@ public class EntTamplier : MonoBehaviour
     {
     }
 
-    const float ThrowPodHeight = 100f;
-    const float ThrowPodDuration = 4f;
+    public Material InfectionMaterial;
+
+    const float ThrowPodHeight = 120f;
+    const float ThrowPodDuration = 2.5f;
 
     public Rect LivingRect;
     private Vector3 _wayPoint1;
@@ -70,19 +72,20 @@ public class EntTamplier : MonoBehaviour
     {
         IsInfected = true;
         if (donorID != -1)
-        {
-            Progression.Instance.Score++;
-            GlobalEventAggregator.EventAggregator.Publish(new EventScore());
-        }
+            Progression.Instance.IncScore();
+        GlobalEventAggregator.EventAggregator.Publish(new EventScore());
 
+        // Activate aiming lines
         foreach (var spore in Spores)
         {
             if( spore.gameObject.activeSelf )
                 spore.transform.GetChild(0).gameObject.SetActive(true);
         }
 
-        // change color
-        GetComponent<MeshRenderer>().material.color = Color.yellow;
+        // Change color
+        GetComponent<MeshRenderer>().material = InfectionMaterial;
+        foreach (var spore in Spores)
+            spore.GetComponent<MeshRenderer>().material = InfectionMaterial;
 
         Rotating.StartRotating();
     }
@@ -118,8 +121,8 @@ public class EntTamplier : MonoBehaviour
             ThrowPods(spore.up.normalized, spore);
         }
 
-        transform.DORotate(new Vector3(0, 0, transform.eulerAngles.z + 360), 1.0f, RotateMode.FastBeyond360).SetEase(Ease.Linear).SetLoops(-1);
-        transform.DOScale(Vector3.one * 0.01f, ThrowPodDuration * 0.25f).OnComplete(() => Destroy(gameObject));
+        transform.DORotate(new Vector3(0, 0, transform.eulerAngles.z + 360), 0.6f, RotateMode.FastBeyond360).SetEase(Ease.Linear).SetLoops(-1);
+        transform.DOScale(Vector3.one * 0.01f, ThrowPodDuration * 1.05f).OnComplete(() => Destroy(gameObject));
     }
 
     private void ThrowPods(Vector3 normal, Transform obj)
@@ -129,6 +132,6 @@ public class EntTamplier : MonoBehaviour
         obj.DOMove(
             obj.transform.position + normal * ThrowPodHeight,
             ThrowPodDuration)
-            .OnComplete(() => Destroy(obj.gameObject));
+            .OnComplete(() => Destroy(obj.gameObject)).SetEase(Ease.Linear);
     }
 }
