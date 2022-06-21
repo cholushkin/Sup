@@ -31,6 +31,8 @@ public class EntTamplier : MonoBehaviour
         {
             spore.gameObject.SetActive(Random.value < 0.5f);
         }
+        if(IsInfected) // for the node which is infected on start
+            Spores[0].gameObject.SetActive(true);
 
         if (LivingRect.width > LivingRect.height) // move horizontally
         {
@@ -70,7 +72,6 @@ public class EntTamplier : MonoBehaviour
         {
             // first ever infected node
             Progression.Instance.Score++;
-            Spores[0].gameObject.SetActive(true);
             GlobalEventAggregator.EventAggregator.Publish(new EventScore());
         }
 
