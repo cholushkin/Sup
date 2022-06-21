@@ -19,6 +19,7 @@ public class EntTamplier : MonoBehaviour
     private float _margin = 1.8f;
 
     public Transform[] Spores;
+    public Transform[] Rays;
     public bool IsInfected;
     public bool IsExpoding;
     public Rotating Rotating;
@@ -70,9 +71,14 @@ public class EntTamplier : MonoBehaviour
         IsInfected = true;
         if (donorID != -1)
         {
-            // first ever infected node
             Progression.Instance.Score++;
             GlobalEventAggregator.EventAggregator.Publish(new EventScore());
+        }
+
+        foreach (var spore in Spores)
+        {
+            if( spore.gameObject.activeSelf )
+                spore.transform.GetChild(0).gameObject.SetActive(true);
         }
 
         // change color
