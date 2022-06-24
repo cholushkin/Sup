@@ -1,9 +1,17 @@
 using System.Linq;
+using Alg;
+using GameGUI;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameController : MonoBehaviour
+public class GameController : Singleton<GameController>
 {
+    enum State
+    {
+        Win,
+        Fail,
+        Game
+    }
     public class EventWin
     {
     }
@@ -12,13 +20,17 @@ public class GameController : MonoBehaviour
     {
     }
 
-
+    public SimpleScoresDB ScoresDb;
     public MapController MapController;
-    private bool _isFail;
-    private bool _isWin;
+    public SimpleGUI GUI;
+    private State _curState;
+    public bool AllowRestart { get; set; }
 
-    void Awake()
+
+    protected override void Awake()
     {
+        base.Awake();
+        _curState = State.Game;
         MapController.Generate();
 
         // get random entity
@@ -31,54 +43,61 @@ public class GameController : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (_curState == State.Fail && AllowRestart)
         {
-            if (_isFail)
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
                 RestartProgression();
-            else if (_isWin)
+            }
+        } 
+        else if (_curState == State.Win)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
                 NextLevel();
-            else
+            }
+        }
+        else if(_curState == State.Game)
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
                 ExplodeAllInfected();
-            return;
+            }
+
+            var ents = MapController.GetEntities();
+
+            // check for win
+            var isWin = ents.Length == 0;
+            if (isWin)
+            {
+                _curState = State.Win;
+                GlobalEventAggregator.EventAggregator.Publish(new EventWin());
+                return;
+            }
+
+            // check for fail
+            var hasInfected = ents.Any(x => x.IsInfected);
+            var hasExploding = ents.Any(x => x.IsExpoding);
+            var isFail = !hasInfected && !hasExploding;
+            if (isFail)
+            {
+                _curState = State.Fail;
+                DownloadHighScore();
+                GUI.PushScreen("ScreenHighscore");
+                GlobalEventAggregator.EventAggregator.Publish(new EventFail());
+                return;
+            }
         }
+    }
 
-        if (Input.GetKeyDown(KeyCode.R))
-        {
-            RestartProgression();
-            return;
-        }
+    public void SendHighScore(string playerName, int score)
+    {
+        ScoresDb.UploadScore(playerName, score);
+    }
 
-        if (Input.GetKeyDown(KeyCode.N))
-        {
-            NextLevel();
-            return;
-        }
-
-
-        if (_isFail || _isWin)
-            return;
-
-        var ents = MapController.GetEntities();
-
-        // check for win
-        var isWin = ents.Length == 0;
-        if (isWin)
-        {
-            _isWin = true;
-            GlobalEventAggregator.EventAggregator.Publish(new EventWin());
-            return;
-        }
-
-        // check for fail
-        var hasInfected = ents.Any(x => x.IsInfected);
-        var hasExploding = ents.Any(x => x.IsExpoding);
-        var isFail = !hasInfected && !hasExploding;
-        if (isFail)
-        {
-            _isFail = true;
-            GlobalEventAggregator.EventAggregator.Publish(new EventFail());
-            return;
-        }
+    public void DownloadHighScore()
+    {
+        ScoresDb.DownloadScores();
     }
 
     public void RestartProgression()

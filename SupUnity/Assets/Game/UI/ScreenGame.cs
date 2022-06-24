@@ -27,9 +27,8 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
 
     public void Handle(GameController.EventFail message)
     {
-        ShowPressAnyKeyToRestart();
+        //ShowPressAnyKeyToRestart();
     }
-
     public void Handle(EntTamplier.EventScore message)
     {
         TextGameScore.text = $"Score: {Progression.Instance.Score}";
