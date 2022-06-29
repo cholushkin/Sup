@@ -1,4 +1,3 @@
-using System.Collections.Generic;
 using Alg;
 using Assets.Plugins.Alg;
 using UnityEngine;
@@ -15,18 +14,6 @@ public class Progression : Singleton<Progression>
     private const float FieldHeightMax = 50f;
     private const float FieldScaleInc = 1.15f;
     public GameObject PrefabLevCube;
-
-    protected override void Awake()
-    {
-        if (Instance != null)
-        {
-            Destroy(gameObject);
-            return;
-        }
-        base.Awake();
-        
-        DontDestroyOnLoad(transform.gameObject);
-    }
 
     private void BuildLevelVisualization()
     {

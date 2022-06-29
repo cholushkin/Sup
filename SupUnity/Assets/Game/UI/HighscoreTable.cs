@@ -3,7 +3,7 @@ using UnityEngine;
 public class HighscoreTable : MonoBehaviour
 {
     public SlotController[] Slots;
- 
+
     public void PlayLoadingAnimation()
     {
         foreach (var slotController in Slots)
@@ -12,20 +12,21 @@ public class HighscoreTable : MonoBehaviour
         }
     }
 
-    public void SetData(SimpleScoresDB.ScoreTable tableData)
+    public void SetData(ScreenHighscore.ScoreTable tableData)
     {
-        for (int i = 0; i < Slots.Length; ++i)
+        foreach (var slot in Slots)
         {
-            if (i < tableData.Rows.Length)
-            {
-                Slots[i].SetName(tableData.Rows[i].Name);
-                Slots[i].SetScore(tableData.Rows[i].Score);
-            }
-            else
-            {
-                Slots[i].SetName("");
-                Slots[i].SetScore(0);
-            }
+            slot.SetName("");
+            slot.SetScore(0);
         }
+
+        int i = 0;
+        if (tableData != null)
+            foreach (var row in tableData.Rows)
+            {
+                Slots[i].SetName(string.IsNullOrEmpty(row.Name) ? "No name" : row.Name);
+                Slots[i].SetScore(row.Score);
+                ++i;
+            }
     }
 }

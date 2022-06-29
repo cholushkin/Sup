@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Linq;
 using Alg;
 using GameGUI;
@@ -12,6 +13,7 @@ public class GameController : Singleton<GameController>
         Fail,
         Game
     }
+
     public class EventWin
     {
     }
@@ -20,11 +22,10 @@ public class GameController : Singleton<GameController>
     {
     }
 
-    public SimpleScoresDB ScoresDb;
     public MapController MapController;
     public SimpleGUI GUI;
+
     private State _curState;
-    public bool AllowRestart { get; set; }
 
 
     protected override void Awake()
@@ -43,14 +44,7 @@ public class GameController : Singleton<GameController>
 
     void Update()
     {
-        if (_curState == State.Fail && AllowRestart)
-        {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                RestartProgression();
-            }
-        } 
-        else if (_curState == State.Win)
+        if (_curState == State.Win)
         {
             if (Input.GetKeyDown(KeyCode.Space))
             {
@@ -82,7 +76,6 @@ public class GameController : Singleton<GameController>
             if (isFail)
             {
                 _curState = State.Fail;
-                DownloadHighScore();
                 GUI.PushScreen("ScreenHighscore");
                 GlobalEventAggregator.EventAggregator.Publish(new EventFail());
                 return;
@@ -90,20 +83,10 @@ public class GameController : Singleton<GameController>
         }
     }
 
-    public void SendHighScore(string playerName, int score)
-    {
-        ScoresDb.UploadScore(playerName, score);
-    }
-
-    public void DownloadHighScore()
-    {
-        ScoresDb.DownloadScores();
-    }
-
     public void RestartProgression()
     {
-        SceneManager.LoadScene("Gameplay");
         Progression.Instance.ResetProgression();
+        SceneManager.LoadScene("Gameplay");
     }
 
     public void NextLevel()

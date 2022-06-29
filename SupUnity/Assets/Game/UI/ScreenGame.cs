@@ -5,7 +5,6 @@ using TMPro;
 using UnityEngine;
 
 public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
-    IHandle<GameController.EventFail>,
     IHandle<GameController.EventWin>,
     IHandle<EntTamplier.EventScore>
 {
@@ -24,11 +23,6 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     {
         GlobalEventAggregator.EventAggregator.Subscribe(this);
     }
-
-    public void Handle(GameController.EventFail message)
-    {
-        //ShowPressAnyKeyToRestart();
-    }
     public void Handle(EntTamplier.EventScore message)
     {
         TextGameScore.text = $"Score: {Progression.Instance.Score}";
@@ -39,7 +33,6 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     {
         ShowPressAnyKeyForNextLevel();
     }
-
 
     public override void StartAppearAnimation()
     {
@@ -57,7 +50,6 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
         }
     }
 
-
     private void ShowControlHintMessage()
     {
         HintMessage.gameObject.SetActive(true);
@@ -74,10 +66,5 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     private void ShowPressAnyKeyForNextLevel()
     {
         PressAnyKeyToNextLevel.gameObject.SetActive(true);
-    }
-
-    private void ShowPressAnyKeyToRestart()
-    {
-        PressAnyKeyToRestart.gameObject.SetActive(true);
     }
 }
