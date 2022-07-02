@@ -64,7 +64,7 @@ public class PlayFabManager : Singleton<PlayFabManager>
         if (_isLoggedIn)
         {
             if (LogChecker.Normal())
-                Debug.Log("Attempt to call Login while _isLoggedIn==true");
+                Debug.Log("PF.Attempt to call Login while _isLoggedIn==true");
             return;
         }
 
@@ -101,7 +101,7 @@ public class PlayFabManager : Singleton<PlayFabManager>
     public void SendScore(int score)
     {
         if (LogChecker.Normal())
-            Debug.Log("SendScore");
+            Debug.Log("SendScore", this);
         if (!_isLoggedIn)
         {
             GlobalEventAggregator.EventAggregator.Publish(new EventSendScoreError());
@@ -182,19 +182,17 @@ public class PlayFabManager : Singleton<PlayFabManager>
     {
         if (LogChecker.Normal())
         {
-            Debug.Log($"OnLeaderboardGet capacity|count {result.Leaderboard.Count}");
+            Debug.Log($"OnLeaderboardGetSuccess count {result.Leaderboard.Count} ver:{result.Version} {result.Leaderboard}");
             Debug.Log("DisplayName|PlayFabId|Position|Profile|StatValue");
+            foreach (var playerLeaderboardEntry in result.Leaderboard)
+            {
+                Debug.Log($"{playerLeaderboardEntry.DisplayName}|{playerLeaderboardEntry.PlayFabId}|{playerLeaderboardEntry.Position}|{playerLeaderboardEntry.Profile}|{playerLeaderboardEntry.StatValue}");
+            }
         }
 
         GlobalEventAggregator.EventAggregator.Publish(
             new EventGetLeaderboardSuccess { Leaderboard = result.Leaderboard }
         );
-
-        if (LogChecker.Normal())
-            foreach (var playerLeaderboardEntry in result.Leaderboard)
-            {
-                Debug.Log($"{playerLeaderboardEntry.DisplayName}|{playerLeaderboardEntry.PlayFabId}|{playerLeaderboardEntry.Position}|{playerLeaderboardEntry.Profile}|{playerLeaderboardEntry.StatValue}");
-            }
     }
 
     private void OnNameUpdateSuccess(UpdateUserTitleDisplayNameResult result)
@@ -208,9 +206,12 @@ public class PlayFabManager : Singleton<PlayFabManager>
     private void OnLeaderboardUpdateSuccess(UpdatePlayerStatisticsResult result)
     {
         if (LogChecker.Normal())
-            Debug.Log("OnLeaderboardUpdateSuccess");
+        {
+            Debug.Log($"OnLeaderboardUpdateSuccess {result}");
+        }
+
         GlobalEventAggregator.EventAggregator.Publish(new EventSendScoreSuccess());
-        Debug.Log(result);
+        
     }
 
     // Fail callbacks

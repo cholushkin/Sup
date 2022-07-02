@@ -6,7 +6,7 @@ using UnityEngine;
 
 public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     IHandle<GameController.EventWin>,
-    IHandle<EntTamplier.EventScore>
+    IHandle<Progression.EventScore>
 {
     public Transform StartMessage;
     public Transform HintMessage;
@@ -22,7 +22,7 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     {
         GlobalEventAggregator.EventAggregator.Subscribe(this);
     }
-    public void Handle(EntTamplier.EventScore message)
+    public void Handle(Progression.EventScore message)
     {
         TextGameScore.text = $"Score: {Progression.Instance.Score}";
         TextBestScore.text = $"Your best score: {Progression.Instance.BestScore}";

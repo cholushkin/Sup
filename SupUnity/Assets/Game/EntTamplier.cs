@@ -4,10 +4,6 @@ using GameLib.Random;
 
 public class EntTamplier : MonoBehaviour
 {
-    public class EventScore
-    {
-    }
-
     public Material InfectionMaterial;
 
     const float ThrowPodHeight = 120f;
@@ -73,7 +69,6 @@ public class EntTamplier : MonoBehaviour
         IsInfected = true;
         if (donorID != -1)
             Progression.Instance.IncScore();
-        GlobalEventAggregator.EventAggregator.Publish(new EventScore());
 
         // Activate aiming lines
         foreach (var spore in Spores)

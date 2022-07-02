@@ -4,6 +4,10 @@ using UnityEngine;
 
 public class Progression : Singleton<Progression>
 {
+    public class EventScore
+    {
+    }
+
     public int Level;
     public int Score { get; private set; }
     public int BestScore;
@@ -50,6 +54,8 @@ public class Progression : Singleton<Progression>
         Score += scoreInc;
         if (Score > BestScore)
             BestScore = Score;
+
+        GlobalEventAggregator.EventAggregator.Publish(new EventScore());
     }
 
     [ContextMenu("Give score +10")]

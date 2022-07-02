@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using DG.Tweening;
 using Events;
 using GameGUI;
 using GameLib.Log;
@@ -54,6 +55,7 @@ public class ScreenHighscore :
     public LogChecker Log;
 
     private State _state;
+    private int _attempt = 0;
 
     public void Initialize()
     {
@@ -96,6 +98,11 @@ public class ScreenHighscore :
         InputField.gameObject.SetActive(false);
     }
 
+    void GetLeaderBoardTable(float delay)
+    {
+        DOVirtual.DelayedCall(delay, () => { PlayFabManager.Instance.GetLeaderboard(); });
+    }
+
     public void Handle(PlayFabManager.EventGetLeaderboardSuccess message)
     {
         if (Log.Normal())
@@ -133,7 +140,30 @@ public class ScreenHighscore :
         }
         else if (_state == State.SecondDownloadTable)
         {
-            Debug.Log($"user index in table: {GetIndexOfUserInTable(message.Leaderboard, PlayFabManager.Instance.GetPlayerID())}");
+            Debug.Log($"user index in table: attempt:{_attempt} ");
+
+            bool resend = false;
+            // Got empty table but it should contain recent score 
+            if (GetIndexOfUserInTable(message.Leaderboard, PlayFabManager.Instance.GetPlayerID()) == -1)
+            {
+                Debug.LogWarning("Got empty leaderboard, request again");
+                resend = true;
+            } 
+            // Got old leaderboard
+            else if (CheckIfTheScoreIsOld(message.Leaderboard, PlayFabManager.Instance.GetPlayerID()))
+            {
+                Debug.LogWarning("Got old leaderboard, request again");
+                resend = true;
+            }
+
+            if (resend)
+            {
+                _attempt++;
+                if (_attempt < 8)
+                    GetLeaderBoardTable(1f);
+                return;
+            }
+
             ShowTable(message.Leaderboard);
             ShowPressSpaceToConinue();
             _state = State.WaitForRestart;
@@ -198,7 +228,7 @@ public class ScreenHighscore :
         if (Log.Normal())
             Debug.Log("Handle EventSendScoreSuccess");
         _state = State.SecondDownloadTable;
-        PlayFabManager.Instance.GetLeaderboard();
+        GetLeaderBoardTable(1f);
     }
 
     public void ShowLoadingProgress()
@@ -261,5 +291,23 @@ public class ScreenHighscore :
         }
         return -1;
     }
+
+    public static bool CheckIfTheScoreIsOld(List<PlayerLeaderboardEntry> responseLeaderboard, string playerId)
+    {
+        foreach (var entry in responseLeaderboard)
+        {
+            if (entry.Profile.PlayerId == playerId)
+                return entry.StatValue != Progression.Instance.Score;
+        }
+
+        return false;
+    }
+
+    [ContextMenu("DbgGetHST")]
+    void DbgGetHST()
+    {
+        PlayFabManager.Instance.GetLeaderboard();
+    }
+
 }
 
