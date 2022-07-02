@@ -1,6 +1,7 @@
 using System.Collections.Generic;
 using Events;
 using GameGUI;
+using GameLib.Log;
 using PlayFab.ClientModels;
 using TMPro;
 using UnityEngine;
@@ -45,10 +46,12 @@ public class ScreenHighscore :
 
     public TextMeshProUGUI YourScoreText;
     public TextMeshProUGUI NewHighScoreText;
+    public TextMeshProUGUI TextError;
     public TextMeshProUGUI TextSpaceToConinue;
     public HighscoreTable HighscoreTable;
     public TMP_InputField InputField;
     public ScoreTable Scores;
+    public LogChecker Log;
 
     private State _state;
 
@@ -59,7 +62,7 @@ public class ScreenHighscore :
 
     void Update()
     {
-        if (_state==State.WaitForRestart && Input.GetKeyDown(KeyCode.Space))
+        if (_state == State.WaitForRestart && Input.GetKeyDown(KeyCode.Space))
         {
             _state = State.None;
             GameController.Instance.RestartProgression();
@@ -68,7 +71,16 @@ public class ScreenHighscore :
 
     public override void StartAppearAnimation()
     {
+        if (Log.Normal())
+            Debug.Log("StartAppearAnimation: Show table loading");
+
+        base.StartAppearAnimation();
         _state = State.FirstDownloadTable;
+
+        NewHighScoreText.gameObject.SetActive(false);
+        InputField.gameObject.SetActive(false);
+        TextSpaceToConinue.gameObject.SetActive(false);
+
         ShowLoadingProgress();
         ShowYourScoreText();
         PlayFabManager.Instance.GetLeaderboard();
@@ -76,6 +88,8 @@ public class ScreenHighscore :
 
     public void OnEnter()
     {
+        if (Log.Normal())
+            Debug.Log("OnEnter: Enter name");
         _state = State.SendName;
         PlayFabManager.Instance.ChangeName(InputField.text);
         HighscoreTable.PlayLoadingAnimation();
@@ -84,11 +98,15 @@ public class ScreenHighscore :
 
     public void Handle(PlayFabManager.EventGetLeaderboardSuccess message)
     {
+        if (Log.Normal())
+            Debug.Log($"On EventGetLeaderboardSuccess {_state}");
         if (_state == State.FirstDownloadTable)
         {
             ShowTable(message.Leaderboard);
             if (PlayFabManager.HasNewHighscore(message.Leaderboard, Progression.Instance.Score))
             {
+                if (Log.Normal())
+                    Debug.Log("new high score");
                 ShowHasNewHighscore();
                 if (PlayFabManager.Instance.IsNameEmpty())
                 {
@@ -99,17 +117,23 @@ public class ScreenHighscore :
                 {
                     // send score
                     _state = State.SendScore;
+                    ShowLoadingProgress();
+                    if (Log.Normal())
+                        Debug.Log("send score");
                     PlayFabManager.Instance.SendScore(Progression.Instance.Score);
                 }
             }
             else
             {
+                if (Log.Normal())
+                    Debug.Log("no new high score");
                 ShowPressSpaceToConinue();
                 _state = State.WaitForRestart;
             }
         }
         else if (_state == State.SecondDownloadTable)
         {
+            Debug.Log($"user index in table: {GetIndexOfUserInTable(message.Leaderboard, PlayFabManager.Instance.GetPlayerID())}");
             ShowTable(message.Leaderboard);
             ShowPressSpaceToConinue();
             _state = State.WaitForRestart;
@@ -118,16 +142,19 @@ public class ScreenHighscore :
 
     public void Handle(PlayFabManager.EventGetLeaderboardError message)
     {
-        Debug.Log("Handle EventGetLeaderboardError");
+        if (Log.Important())
+            Debug.Log($"Handle EventGetLeaderboardError {_state}");
         if (_state == State.FirstDownloadTable)
         {
             HighscoreTable.SetData(null);
+            ShowError("Can't load leader board.");
             ShowPressSpaceToConinue();
             _state = State.WaitForRestart;
         }
         else if (_state == State.SecondDownloadTable)
         {
             HighscoreTable.SetData(null);
+            ShowError("Can't load leader board.");
             ShowPressSpaceToConinue();
             _state = State.WaitForRestart;
         }
@@ -135,44 +162,50 @@ public class ScreenHighscore :
 
     public void Handle(PlayFabManager.EventRenameSuccess message)
     {
+        if (Log.Normal())
+            Debug.Log("Handle EventRenameSuccess");
         if (_state == State.SendName)
         {
             _state = State.SendScore;
+            ShowLoadingProgress();
             PlayFabManager.Instance.SendScore(Progression.Instance.Score);
         }
     }
 
     public void Handle(PlayFabManager.EventChangeNameError message)
     {
-        Debug.Log("Handle EventChangeNameError");
+        if (Log.Important())
+            Debug.Log("Handle EventChangeNameError");
         if (_state == State.SendName)
         {
+            ShowError("Can't change name.");
             ShowPressSpaceToConinue();
             _state = State.WaitForRestart;
         }
     }
-    
+
     public void Handle(PlayFabManager.EventSendScoreError message)
     {
-        Debug.Log("Handle EventSendScoreError");
+        if (Log.Important())
+            Debug.Log("Handle EventSendScoreError");
         _state = State.WaitForRestart;
+        ShowError("Can't send score.");
         ShowPressSpaceToConinue();
     }
 
     public void Handle(PlayFabManager.EventSendScoreSuccess message)
     {
+        if (Log.Normal())
+            Debug.Log("Handle EventSendScoreSuccess");
         _state = State.SecondDownloadTable;
         PlayFabManager.Instance.GetLeaderboard();
     }
 
     public void ShowLoadingProgress()
     {
-        base.StartAppearAnimation();
         HighscoreTable.PlayLoadingAnimation();
-        NewHighScoreText.gameObject.SetActive(false);
-        InputField.gameObject.SetActive(false);
-        TextSpaceToConinue.gameObject.SetActive(false);
     }
+
     private void ShowTable(List<PlayerLeaderboardEntry> leaderboard)
     {
         var tableData = ConvertResponseToTable(leaderboard);
@@ -199,6 +232,11 @@ public class ScreenHighscore :
         InputField.ActivateInputField();
     }
 
+    private void ShowError(string errorText)
+    {
+        TextError.text = errorText;
+    }
+
     public static ScoreTable ConvertResponseToTable(List<PlayerLeaderboardEntry> responseLeaderboard)
     {
         var scoreTable = new ScoreTable();
@@ -210,6 +248,18 @@ public class ScreenHighscore :
             scoreTable.Rows.Add(row);
         }
         return scoreTable;
+    }
+
+    public static int GetIndexOfUserInTable(List<PlayerLeaderboardEntry> responseLeaderboard, string playerId)
+    {
+        int index = 0;
+        foreach (var entry in responseLeaderboard)
+        {
+            if (entry.Profile.PlayerId == playerId)
+                return index;
+            index++;
+        }
+        return -1;
     }
 }
 

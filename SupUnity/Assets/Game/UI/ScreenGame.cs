@@ -16,7 +16,6 @@ public class ScreenGame : GUIScreenBase, SimpleGUI.IInitialize,
     public TextMeshProUGUI TextGameScore;
     public TextMeshProUGUI TextBestScore;
 
-    public Transform PressAnyKeyToRestart;
     public Transform PressAnyKeyToNextLevel;
 
     public void Initialize()

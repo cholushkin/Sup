@@ -42,6 +42,11 @@ public class GameController : Singleton<GameController>
         ent.Infect(-1);
     }
 
+    void Start()
+    {
+        PlayFabManager.Instance.Login();
+    }
+
     void Update()
     {
         if (_curState == State.Win)

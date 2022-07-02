@@ -43,10 +43,18 @@ public class Progression : Singleton<Progression>
         BuildLevelVisualization();
     }
 
-    public void IncScore()
+    public void IncScore(int scoreInc = 1)
     {
-        ++Score;
+        if(scoreInc < 0)
+            return;
+        Score += scoreInc;
         if (Score > BestScore)
             BestScore = Score;
+    }
+
+    [ContextMenu("Give score +10")]
+    void DbgGiveScore()
+    {
+        IncScore(10);
     }
 }
