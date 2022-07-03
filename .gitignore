@@ -11,3 +11,5 @@ SupUnity/obj/
 Build/
 PackagesDistributives/
 SupUnity/Assembly-CSharp-firstpass.csproj
+/SupUnity/PlayFab.csproj
+/SupUnity/PlayFabSDKEditor.csproj
